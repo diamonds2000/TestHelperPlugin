@@ -41,8 +41,12 @@ void commandMenuInit()
 {
 	setCommand(0, TEXT("Check Python2.x Syntax"), checkSyntax2x, NULL, false);
 	setCommand(1, TEXT("Check Python3.x Syntax"), checkSyntax3x, NULL, false);
-	setCommand(2, TEXT("Run RTest"), runRTest, NULL, false);
-	setCommand(3, TEXT("Run STest"), runSTest, NULL, false);
+    // separator
+	setCommand(3, TEXT("Run RTest"), runRTest, NULL, false);
+    setCommand(4, TEXT("Run RTest Case"), runRTestCase, NULL, false);
+    // separator
+	setCommand(6, TEXT("Run STest"), runSTest, NULL, false);
+    setCommand(7, TEXT("Run STest Case"), runSTestCase, NULL, false);
 }
 
 void commandMenuCleanUp()
@@ -65,7 +69,7 @@ bool setCommand(size_t index, TCHAR *cmdName, PFUNCPLUGINCMD pFunc, ShortcutKey 
 	return true;
 }
 
-void runTestFile(LPCTSTR szType)
+void runTest(LPCTSTR szType, LPCTSTR szCase)
 {
     TCHAR filePath[MAX_PATH];
     ZeroMemory(filePath, sizeof(filePath));
@@ -81,7 +85,14 @@ void runTestFile(LPCTSTR szType)
         {
             TCHAR param[MAX_PATH];
             ZeroMemory(param, sizeof(param));
-            _stprintf_s(param, _T("/c \"%s\\testrunner.bat\" --type %s --files %s"), testRunnerPath, szType, filePath);
+            if (szCase)
+            {
+                _stprintf_s(param, _T("/c \"%s\\testrunner.bat\" --type %s --files %s --cases %s"), testRunnerPath, szType, filePath, szCase);
+            }
+            else
+            {
+                _stprintf_s(param, _T("/c \"%s\\testrunner.bat\" --type %s --files %s"), testRunnerPath, szType, filePath);
+            }
             ShellExecute(NULL, NULL, _T("cmd.exe"), param, testRunnerPath, SW_SHOW);
         }
     }
@@ -95,14 +106,39 @@ void runTestFile(LPCTSTR szType)
     }
 }
 
+void runTestCase(LPCTSTR szType)
+{
+    TCHAR testCase[MAX_PATH];
+    ZeroMemory(testCase, sizeof(testCase));
+    getCurrentWord(testCase, _countof(testCase));
+    if (_tcslen(testCase) > 0)
+    {
+        runTest(szType, testCase);
+    }
+    else
+    {
+        MessageBox(nppData._nppHandle, _T("Please select a testcase first"), _T("Error"), MB_OK);
+    }
+}
+
 void runRTest()
 {
-    runTestFile(_T("lrt"));
+    runTest(_T("lrt"), nullptr);
 }
 
 void runSTest()
 {
-    runTestFile(_T("stest"));
+    runTest(_T("stest"), nullptr);
+}
+
+void runRTestCase()
+{
+    runTestCase(_T("lrt"));
+}
+
+void runSTestCase()
+{
+    runTestCase(_T("stest"));
 }
 
 void checkSyntax(LPCTSTR szPythonPath)

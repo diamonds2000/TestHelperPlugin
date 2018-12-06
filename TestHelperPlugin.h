@@ -5,7 +5,7 @@
 
 const TCHAR NPP_PLUGIN_NAME[] = TEXT("MSC Test helper");
 
-const int nbFunc = 4;
+const int nbFunc = 8;
 
 void pluginInit(HMODULE hModule);
 
@@ -20,6 +20,10 @@ bool setCommand(size_t index, TCHAR *cmdName, PFUNCPLUGINCMD pFunc, ShortcutKey 
 void runRTest();
 
 void runSTest();
+
+void runRTestCase();
+
+void runSTestCase();
 
 void checkSyntax2x();
 
