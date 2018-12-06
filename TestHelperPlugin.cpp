@@ -4,15 +4,33 @@
 #include "stdafx.h"
 #include "TestHelperPlugin.h"
 #include "menuCmdID.h"
+#include <map>
 
 
 
 FuncItem funcItem[nbFunc];
 NppData nppData;
 
+std::map<std::wstring, std::wstring> g_config;
 
-void pluginInit(HANDLE hModule)
+
+void pluginInit(HMODULE hModule)
 {
+    wchar_t modulePath[MAX_PATH];
+    GetModuleFileNameW(hModule, modulePath, _countof(modulePath));
+
+    wchar_t configFile[MAX_PATH];
+    getFilePath(modulePath, configFile, _countof(configFile));
+    wcscat_s(configFile, L"\\Config\\testhelper.ini");
+
+    wchar_t buf[MAX_PATH];
+    ZeroMemory(buf, sizeof(buf));
+    GetPrivateProfileStringW(L"path", L"python2", L"", buf, _countof(buf), configFile);
+    g_config[L"python2"] = buf;
+
+    ZeroMemory(buf, sizeof(buf));
+    GetPrivateProfileStringW(L"path", L"python3", L"", buf, _countof(buf), configFile);
+    g_config[L"python3"] = buf;
 }
 
 void pluginCleanUp()
@@ -47,32 +65,79 @@ bool setCommand(size_t index, TCHAR *cmdName, PFUNCPLUGINCMD pFunc, ShortcutKey 
 	return true;
 }
 
+void runTestFile(LPCTSTR szType)
+{
+    TCHAR filePath[MAX_PATH];
+    ZeroMemory(filePath, sizeof(filePath));
+    getCurrentFilePath(filePath, _countof(filePath));
+
+    TCHAR testRunnerPath[MAX_PATH];
+    ZeroMemory(testRunnerPath, sizeof(testRunnerPath));
+    getTestRunnerPath(filePath, testRunnerPath, _countof(testRunnerPath));
+
+    if (_tcslen(testRunnerPath) > 0 && _tcslen(filePath) > 0)
+    {
+        TCHAR param[MAX_PATH];
+        ZeroMemory(param, sizeof(param));
+        _stprintf_s(param, _T("/c \"%s\\testrunner.bat\" --type %s --files %s"), testRunnerPath, szType, filePath);
+        ShellExecute(NULL, NULL, _T("cmd.exe"), param, testRunnerPath, SW_SHOW);
+    }
+    else if (_tcslen(testRunnerPath) == 0)
+    {
+        MessageBox(nppData._nppHandle, _T("Cannot find TestRunner"), _T("Error"), MB_OK);
+    }
+    else if (_tcslen(filePath) == 0)
+    {
+        MessageBox(nppData._nppHandle, _T("Must open a test file first"), _T("Error"), MB_OK);
+    }
+}
 
 void runRTest()
 {
-	TCHAR filePath[MAX_PATH];
-	getCurrentFilePath(filePath, _countof(filePath));
-	MessageBox(NULL, filePath, L"file", MB_OK);
-
-	TCHAR param[MAX_PATH];
-	ZeroMemory(param, sizeof(param));
-	_stprintf(param, _T("/c testrunner.bat --type lrt --files %s"), filePath);
-	ShellExecute(NULL, NULL, _T("cmd.exe"), param, _T(""), SW_SHOW);
+    runTestFile(_T("lrt"));
 }
 
 void runSTest()
 {
+    runTestFile(_T("stest"));
+}
 
+void checkSyntax(LPCTSTR szPythonPath)
+{
+    TCHAR filePath[MAX_PATH];
+    ZeroMemory(filePath, sizeof(filePath));
+    getCurrentFilePath(filePath, _countof(filePath));
+
+    TCHAR param[MAX_PATH];
+    ZeroMemory(param, sizeof(param));
+    _stprintf_s(param, _T("/k \"%s\\python.exe\" -m py_compile %s"), szPythonPath, filePath);
+    ShellExecute(NULL, NULL, _T("cmd.exe"), param, _T(""), SW_SHOW);
 }
 
 void checkSyntax2x()
 {
-
+    auto it = g_config.find(L"python2");
+    if (it != g_config.end() && it->second.length() > 0)
+    {
+        checkSyntax(it->second.c_str());
+    }
+    else
+    {
+        MessageBox(nppData._nppHandle, _T("Please config path of python2 first"), _T("Error"), MB_OK);
+    }
 }
 
 void checkSyntax3x()
 {
-
+    auto it = g_config.find(L"python3");
+    if (it != g_config.end() && it->second.length() > 0)
+    {
+        checkSyntax(it->second.c_str());
+    }
+    else
+    {
+        MessageBox(nppData._nppHandle, _T("Please config path of python3 first"), _T("Error"), MB_OK);
+    }
 }
 
 void getCurrentFilePath(LPTSTR lpszFilePath, int size)
@@ -88,4 +153,41 @@ void getCurrentFile(LPTSTR lpszFilePath, int size)
 void getCurrentWord(LPTSTR lpszWord, int size)
 {
 	::SendMessage(nppData._nppHandle, NPPM_GETCURRENTWORD, (WPARAM)size, (LPARAM)lpszWord);
+}
+
+void getTestRunnerPath(LPCTSTR lpszTestCasePath, LPTSTR lpszPath, int size)
+{
+    const TCHAR* szFind = _T("\\qa\\");
+
+    size_t index = 0;
+    LPCTSTR lpszFind = lpszTestCasePath;
+    while (true)
+    {
+        lpszFind = _tcsstr(lpszFind, szFind);
+        if (!lpszFind)
+        {
+            break;
+        }
+
+        index = lpszFind - lpszTestCasePath;
+        lpszFind += _tcslen(szFind);
+    }
+
+    if (index > 0)
+    {
+        _tcsncpy_s(lpszPath, size, lpszTestCasePath, index);
+    }
+}
+
+void getFilePath(LPCTSTR lpszFilePathName, LPTSTR lpszPath, int size)
+{
+    LPCTSTR lpszFind = _tcsrchr(lpszFilePathName, _T('\\'));
+    if (lpszFind)
+    {
+        size_t count = lpszFind - lpszFilePathName;
+        if (count)
+        {
+            _tcsncpy_s(lpszPath, size, lpszFilePathName, count);
+        }
+    }
 }
