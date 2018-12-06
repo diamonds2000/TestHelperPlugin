@@ -35,3 +35,5 @@ void getTestRunnerPath(LPCTSTR lpszTestCasePath, LPTSTR lpszPath, int size);
 
 void getFilePath(LPCTSTR lpszFilePathName, LPTSTR lpszPath, int size);
 
+bool verifyPath(LPCTSTR lpszPath);
+

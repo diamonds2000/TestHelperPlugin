@@ -19,8 +19,8 @@ Global
 		{78B4582B-0DAC-4808-9CB1-F6BE32293E36}.Debug|x64.Build.0 = Debug|x64
 		{78B4582B-0DAC-4808-9CB1-F6BE32293E36}.Release|Win32.ActiveCfg = Release|Win32
 		{78B4582B-0DAC-4808-9CB1-F6BE32293E36}.Release|Win32.Build.0 = Release|Win32
-		{78B4582B-0DAC-4808-9CB1-F6BE32293E36}.Release|x64.ActiveCfg = Release|Win32
-		{78B4582B-0DAC-4808-9CB1-F6BE32293E36}.Release|x64.Build.0 = Release|Win32
+		{78B4582B-0DAC-4808-9CB1-F6BE32293E36}.Release|x64.ActiveCfg = Release|x64
+		{78B4582B-0DAC-4808-9CB1-F6BE32293E36}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

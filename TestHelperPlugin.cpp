@@ -77,10 +77,13 @@ void runTestFile(LPCTSTR szType)
 
     if (_tcslen(testRunnerPath) > 0 && _tcslen(filePath) > 0)
     {
-        TCHAR param[MAX_PATH];
-        ZeroMemory(param, sizeof(param));
-        _stprintf_s(param, _T("/c \"%s\\testrunner.bat\" --type %s --files %s"), testRunnerPath, szType, filePath);
-        ShellExecute(NULL, NULL, _T("cmd.exe"), param, testRunnerPath, SW_SHOW);
+        if (verifyPath(testRunnerPath) && verifyPath(filePath))
+        {
+            TCHAR param[MAX_PATH];
+            ZeroMemory(param, sizeof(param));
+            _stprintf_s(param, _T("/c \"%s\\testrunner.bat\" --type %s --files %s"), testRunnerPath, szType, filePath);
+            ShellExecute(NULL, NULL, _T("cmd.exe"), param, testRunnerPath, SW_SHOW);
+        }
     }
     else if (_tcslen(testRunnerPath) == 0)
     {
@@ -108,10 +111,13 @@ void checkSyntax(LPCTSTR szPythonPath)
     ZeroMemory(filePath, sizeof(filePath));
     getCurrentFilePath(filePath, _countof(filePath));
 
-    TCHAR param[MAX_PATH];
-    ZeroMemory(param, sizeof(param));
-    _stprintf_s(param, _T("/k \"%s\\python.exe\" -m py_compile %s"), szPythonPath, filePath);
-    ShellExecute(NULL, NULL, _T("cmd.exe"), param, _T(""), SW_SHOW);
+    if (verifyPath(filePath))
+    {
+        TCHAR param[MAX_PATH];
+        ZeroMemory(param, sizeof(param));
+        _stprintf_s(param, _T("/k \"%s\\python.exe\" -m pyflakes %s"), szPythonPath, filePath);
+        ShellExecute(NULL, NULL, _T("cmd.exe"), param, _T(""), SW_SHOW);
+    }
 }
 
 void checkSyntax2x()
@@ -190,4 +196,15 @@ void getFilePath(LPCTSTR lpszFilePathName, LPTSTR lpszPath, int size)
             _tcsncpy_s(lpszPath, size, lpszFilePathName, count);
         }
     }
+}
+
+//the path cannot include space
+bool verifyPath(LPCTSTR lpszPath)
+{
+    if (_tcschr(lpszPath, _T(' ')))
+    {
+        MessageBox(nppData._nppHandle, _T("The path cannot include space character"), _T("Error"), MB_OK);
+        return false;
+    }
+    return true;
 }
