@@ -46,9 +46,11 @@ void commandMenuInit()
     // separator
 	setCommand(5, TEXT("Run RTest"), runRTest, NULL, false);
     setCommand(6, TEXT("Run RTest Case"), runRTestCase, NULL, false);
+    setCommand(7, TEXT("Run RTests in dir"), runRTestInDir, NULL, false);
     // separator
-	setCommand(8, TEXT("Run STest"), runSTest, NULL, false);
-    setCommand(9, TEXT("Run STest Case"), runSTestCase, NULL, false);
+	setCommand(9, TEXT("Run STest"), runSTest, NULL, false);
+    setCommand(10, TEXT("Run STest Case"), runSTestCase, NULL, false);
+    setCommand(11, TEXT("Run STests in dir"), runSTestInDir, NULL, false);
 }
 
 void commandMenuCleanUp()
@@ -108,6 +110,36 @@ void runTest(LPCTSTR szType, LPCTSTR szCase)
     }
 }
 
+void runTestDir(LPCTSTR szType)
+{
+    TCHAR dirPath[MAX_PATH];
+    ZeroMemory(dirPath, sizeof(dirPath));
+    getCurrentFileDir(dirPath, _countof(dirPath));
+
+    TCHAR testRunnerPath[MAX_PATH];
+    ZeroMemory(testRunnerPath, sizeof(testRunnerPath));
+    getTestRunnerPath(dirPath, testRunnerPath, _countof(testRunnerPath));
+
+    if (_tcslen(testRunnerPath) > 0 && _tcslen(dirPath) > 0)
+    {
+        if (verifyPath(testRunnerPath) && verifyPath(dirPath))
+        {
+            TCHAR param[MAX_PATH];
+            ZeroMemory(param, sizeof(param));
+            _stprintf_s(param, _T("/c \"%s\\testrunner.bat\" --type %s -d %s"), testRunnerPath, szType, dirPath);
+            ShellExecute(NULL, NULL, _T("cmd.exe"), param, testRunnerPath, SW_SHOW);
+        }
+    }
+    else if (_tcslen(testRunnerPath) == 0)
+    {
+        MessageBox(nppData._nppHandle, _T("Cannot find TestRunner"), _T("Error"), MB_OK);
+    }
+    else if (_tcslen(dirPath) == 0)
+    {
+        MessageBox(nppData._nppHandle, _T("Must open a test file first"), _T("Error"), MB_OK);
+    }
+}
+
 void runTestCase(LPCTSTR szType)
 {
     TCHAR testCase[MAX_PATH];
@@ -128,9 +160,19 @@ void runRTest()
     runTest(_T("lrt"), nullptr);
 }
 
+void runRTestInDir()
+{
+    runTestDir(_T("lrt"));
+}
+
 void runSTest()
 {
     runTest(_T("stest"), nullptr);
+}
+
+void runSTestInDir()
+{
+    runTestDir(_T("stest"));
 }
 
 void runRTestCase()
@@ -207,6 +249,11 @@ void getCurrentFilePath(LPTSTR lpszFilePath, int size)
 void getCurrentFile(LPTSTR lpszFilePath, int size)
 {
 	::SendMessage(nppData._nppHandle, NPPM_GETFILENAME, (WPARAM)size, (LPARAM)lpszFilePath);
+}
+
+void getCurrentFileDir(LPTSTR lpszDirPath, int size)
+{
+    ::SendMessage(nppData._nppHandle, NPPM_GETCURRENTDIRECTORY, (WPARAM)size, (LPARAM)lpszDirPath);
 }
 
 void getCurrentWord(LPTSTR lpszWord, int size)
