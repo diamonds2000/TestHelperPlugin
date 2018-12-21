@@ -5,7 +5,7 @@
 
 const TCHAR NPP_PLUGIN_NAME[] = TEXT("MSC Test helper");
 
-const int nbFunc = 8;
+const int nbFunc = 10;
 
 void pluginInit(HMODULE hModule);
 
@@ -16,6 +16,8 @@ void commandMenuInit();
 void commandMenuCleanUp();
 
 bool setCommand(size_t index, TCHAR *cmdName, PFUNCPLUGINCMD pFunc, ShortcutKey *sk = NULL, bool check0nInit = false);
+
+void checkout();
 
 void runRTest();
 
@@ -38,6 +40,8 @@ void getCurrentWord(LPTSTR lpszWord, int size);
 void getTestRunnerPath(LPCTSTR lpszTestCasePath, LPTSTR lpszPath, int size);
 
 void getFilePath(LPCTSTR lpszFilePathName, LPTSTR lpszPath, int size);
+
+void reloadCurrentFile();
 
 bool verifyPath(LPCTSTR lpszPath);
 

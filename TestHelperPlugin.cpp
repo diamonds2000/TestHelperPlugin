@@ -39,14 +39,16 @@ void pluginCleanUp()
 
 void commandMenuInit()
 {
-	setCommand(0, TEXT("Check Python2.x Syntax"), checkSyntax2x, NULL, false);
-	setCommand(1, TEXT("Check Python3.x Syntax"), checkSyntax3x, NULL, false);
+    setCommand(0, TEXT("P4 Checkout"), checkout, NULL, false);
     // separator
-	setCommand(3, TEXT("Run RTest"), runRTest, NULL, false);
-    setCommand(4, TEXT("Run RTest Case"), runRTestCase, NULL, false);
+	setCommand(2, TEXT("Check Python2.x Syntax"), checkSyntax2x, NULL, false);
+	setCommand(3, TEXT("Check Python3.x Syntax"), checkSyntax3x, NULL, false);
     // separator
-	setCommand(6, TEXT("Run STest"), runSTest, NULL, false);
-    setCommand(7, TEXT("Run STest Case"), runSTestCase, NULL, false);
+	setCommand(5, TEXT("Run RTest"), runRTest, NULL, false);
+    setCommand(6, TEXT("Run RTest Case"), runRTestCase, NULL, false);
+    // separator
+	setCommand(8, TEXT("Run STest"), runSTest, NULL, false);
+    setCommand(9, TEXT("Run STest Case"), runSTestCase, NULL, false);
 }
 
 void commandMenuCleanUp()
@@ -141,6 +143,21 @@ void runSTestCase()
     runTestCase(_T("stest"));
 }
 
+void checkout()
+{
+    TCHAR filePath[MAX_PATH];
+    ZeroMemory(filePath, sizeof(filePath));
+    getCurrentFilePath(filePath, _countof(filePath));
+
+    if (verifyPath(filePath))
+    {
+        TCHAR param[MAX_PATH];
+        ZeroMemory(param, sizeof(param));
+        _stprintf_s(param, _T("edit -c default %s"), filePath);
+        ShellExecute(NULL, NULL, _T("p4.exe"), param, _T(""), SW_HIDE);
+    }
+}
+
 void checkSyntax(LPCTSTR szPythonPath)
 {
     TCHAR filePath[MAX_PATH];
@@ -195,6 +212,15 @@ void getCurrentFile(LPTSTR lpszFilePath, int size)
 void getCurrentWord(LPTSTR lpszWord, int size)
 {
 	::SendMessage(nppData._nppHandle, NPPM_GETCURRENTWORD, (WPARAM)size, (LPARAM)lpszWord);
+}
+
+void reloadCurrentFile()
+{
+    TCHAR filePath[MAX_PATH];
+    ZeroMemory(filePath, sizeof(filePath));
+    getCurrentFilePath(filePath, _countof(filePath));
+
+    ::SendMessage(nppData._nppHandle, NPPM_RELOADFILE, (WPARAM)FALSE, (LPARAM)filePath);
 }
 
 void getTestRunnerPath(LPCTSTR lpszTestCasePath, LPTSTR lpszPath, int size)
