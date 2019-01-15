@@ -7,6 +7,8 @@
 #include <map>
 
 
+#define CMD_STRING  2048
+
 
 FuncItem funcItem[nbFunc];
 NppData nppData;
@@ -87,8 +89,9 @@ void runTest(LPCTSTR szType, LPCTSTR szCase)
     {
         if (verifyPath(testRunnerPath) && verifyPath(filePath))
         {
-            TCHAR param[MAX_PATH];
+            TCHAR param[CMD_STRING];
             ZeroMemory(param, sizeof(param));
+
             if (szCase)
             {
                 _stprintf_s(param, _T("/c \"%s\\testrunner.bat\" --type %s --files %s --cases %s"), testRunnerPath, szType, filePath, szCase);
@@ -97,6 +100,7 @@ void runTest(LPCTSTR szType, LPCTSTR szCase)
             {
                 _stprintf_s(param, _T("/c \"%s\\testrunner.bat\" --type %s --files %s"), testRunnerPath, szType, filePath);
             }
+
             ShellExecute(NULL, NULL, _T("cmd.exe"), param, testRunnerPath, SW_SHOW);
         }
     }
@@ -124,7 +128,7 @@ void runTestDir(LPCTSTR szType)
     {
         if (verifyPath(testRunnerPath) && verifyPath(dirPath))
         {
-            TCHAR param[MAX_PATH];
+            TCHAR param[CMD_STRING];
             ZeroMemory(param, sizeof(param));
             _stprintf_s(param, _T("/c \"%s\\testrunner.bat\" --type %s -d %s"), testRunnerPath, szType, dirPath);
             ShellExecute(NULL, NULL, _T("cmd.exe"), param, testRunnerPath, SW_SHOW);
@@ -193,7 +197,7 @@ void checkout()
 
     if (verifyPath(filePath))
     {
-        TCHAR param[MAX_PATH];
+        TCHAR param[CMD_STRING];
         ZeroMemory(param, sizeof(param));
         _stprintf_s(param, _T("edit -c default %s"), filePath);
         ShellExecute(NULL, NULL, _T("p4.exe"), param, _T(""), SW_HIDE);
@@ -208,7 +212,7 @@ void checkSyntax(LPCTSTR szPythonPath)
 
     if (verifyPath(filePath))
     {
-        TCHAR param[MAX_PATH];
+        TCHAR param[CMD_STRING];
         ZeroMemory(param, sizeof(param));
         _stprintf_s(param, _T("/k \"%s\\python.exe\" -m pyflakes %s"), szPythonPath, filePath);
         ShellExecute(NULL, NULL, _T("cmd.exe"), param, _T(""), SW_SHOW);
