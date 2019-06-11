@@ -53,6 +53,8 @@ void commandMenuInit()
 	setCommand(9, TEXT("Run STest"), runSTest, NULL, false);
     setCommand(10, TEXT("Run STest Case"), runSTestCase, NULL, false);
     setCommand(11, TEXT("Run STests in dir"), runSTestInDir, NULL, false);
+    // separator
+    setCommand(13, TEXT("Open Shell"), openShell, NULL, false);
 }
 
 void commandMenuCleanUp()
@@ -187,6 +189,19 @@ void runRTestCase()
 void runSTestCase()
 {
     runTestCase(_T("stest"));
+}
+
+void openShell()
+{
+    TCHAR dirPath[MAX_PATH];
+    ZeroMemory(dirPath, sizeof(dirPath));
+    getCurrentFileDir(dirPath, _countof(dirPath));
+
+    TCHAR workspace[MAX_PATH];
+    ZeroMemory(workspace, sizeof(workspace));
+    getTestRunnerPath(dirPath, workspace, _countof(workspace));
+
+    ShellExecute(NULL, NULL, _T("powershell.exe"), NULL, workspace, SW_NORMAL);
 }
 
 void checkout()
