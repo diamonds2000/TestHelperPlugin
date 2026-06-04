@@ -5,6 +5,7 @@
 #include "TestHelperPlugin.h"
 #include "menuCmdID.h"
 #include <map>
+#include <string>
 
 
 #define CMD_STRING  2048
